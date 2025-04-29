@@ -1,0 +1,54 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background: black;
+}
+
+canvas {
+  display: block;
+  margin: 0 auto;
+  background: black;
+}
+
+#joystickContainer {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  touch-action: none;
+}
+
+#joystick {
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 30px;
+  left: 30px;
+}
+
+#actionButton {
+  position: absolute;
+  right: 20px;
+  bottom: 40px;
+  padding: 20px;
+  font-size: 18px;
+  border-radius: 10px;
+  background: #444;
+  color: white;
+  border: none;
+}
+
+.message {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 20px;
+  display: none;
+}
