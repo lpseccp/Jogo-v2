@@ -9,26 +9,39 @@ let player = {
   angle: 0
 };
 
-let walls = [
-  // Corredor principal
-  { x: 140, y: 0, w: 10, h: 600 },
-  { x: 250, y: 0, w: 10, h: 600 },
+const walls = [
+  // paredes do corredor
+  { x: 150, y: 0, w: 10, h: 600 }, // esquerda
+  { x: 240, y: 0, w: 10, h: 600 }, // direita
 
-  // Sala esquerda
-  { x: 30, y: 320, w: 110, h: 10 },
-  { x: 30, y: 320, w: 10, h: 110 },
-  { x: 30, y: 430, w: 110, h: 10 },
+  // sala esquerda
+  { x: 60, y: 320, w: 100, h: 10 },
+  { x: 60, y: 320, w: 10, h: 120 },
+  { x: 60, y: 440, w: 100, h: 10 },
 
-  // Sala direita
-  { x: 260, y: 220, w: 110, h: 10 },
-  { x: 370, y: 220, w: 10, h: 110 },
-  { x: 260, y: 330, w: 110, h: 10 }
+  // sala direita
+  { x: 240, y: 200, w: 100, h: 10 },
+  { x: 330, y: 200, w: 10, h: 120 },
+  { x: 240, y: 320, w: 100, h: 10 }
 ];
 
+// portas com colisores
 let doors = [
-  { x: 140, y: 360, w: 10, h: 50, opened: false }, // esquerda
-  { x: 250, y: 260, w: 10, h: 50, opened: false }  // direita
+  {
+    x: 150, y: 360, w: 10, h: 40,
+    open: false,
+    message: false,
+    colider: { x: 150, y: 360, w: 10, h: 40 }
+  },
+  {
+    x: 240, y: 260, w: 10, h: 40,
+    open: false,
+    message: false,
+    colider: { x: 240, y: 260, w: 10, h: 40 }
+  }
 ];
+
+let showMessage = "";
 
 function drawWalls() {
   ctx.fillStyle = "#555";
@@ -38,11 +51,9 @@ function drawWalls() {
 }
 
 function drawDoors() {
-  ctx.fillStyle = "#aaa";
   for (let door of doors) {
-    if (!door.opened) {
-      ctx.fillRect(door.x, door.y, door.w, door.h);
-    }
+    ctx.fillStyle = door.open ? "#2ecc71" : "#aaa";
+    ctx.fillRect(door.x, door.y, door.w, door.h);
   }
 }
 
@@ -77,6 +88,14 @@ function drawLanterna() {
   ctx.restore();
 }
 
+function drawMessage() {
+  if (showMessage) {
+    ctx.fillStyle = "white";
+    ctx.font = "16px sans-serif";
+    ctx.fillText(showMessage, 10, 30);
+  }
+}
+
 function isColliding(x, y) {
   for (let wall of walls) {
     if (
@@ -90,12 +109,13 @@ function isColliding(x, y) {
   }
 
   for (let door of doors) {
-    if (!door.opened) {
+    if (!door.open && door.colider) {
+      let d = door.colider;
       if (
-        x + player.size > door.x &&
-        x - player.size < door.x + door.w &&
-        y + player.size > door.y &&
-        y - player.size < door.y + door.h
+        x + player.size > d.x &&
+        x - player.size < d.x + d.w &&
+        y + player.size > d.y &&
+        y - player.size < d.y + d.h
       ) {
         return true;
       }
@@ -109,42 +129,46 @@ function update() {
   let nextX = player.x + joystickData.dx * player.speed;
   let nextY = player.y + joystickData.dy * player.speed;
 
-  if (!isColliding(nextX, player.y)) player.x = nextX;
-  if (!isColliding(player.x, nextY)) player.y = nextY;
+  if (!isColliding(nextX, player.y)) {
+    player.x = nextX;
+  }
+  if (!isColliding(player.x, nextY)) {
+    player.y = nextY;
+  }
+
+  showMessage = "";
+  for (let door of doors) {
+    let dist = Math.hypot(player.x - door.x, player.y - door.y);
+    if (!door.open && dist < 50) {
+      door.message = true;
+      showMessage = "Aperte Ação para abrir a porta";
+    } else {
+      door.message = false;
+    }
+  }
 }
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "a" || e.key === "A") {
+    for (let door of doors) {
+      if (door.message && !door.open) {
+        door.open = true;
+        door.colider = null; // Remove o bloqueio
+        // opcional: som aqui
+      }
+    }
+  }
+});
 
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   drawWalls();
   drawDoors();
   drawLanterna();
   drawPlayer();
+  drawMessage();
   update();
-
   requestAnimationFrame(gameLoop);
 }
-
-function showMessage(text) {
-  const msg = document.getElementById("message");
-  msg.textContent = text;
-  msg.style.display = "block";
-  setTimeout(() => {
-    msg.style.display = "none";
-  }, 2000);
-}
-
-document.getElementById("actionButton").addEventListener("click", () => {
-  for (let i = 0; i < doors.length; i++) {
-    const door = doors[i];
-    const dx = Math.abs(player.x - (door.x + door.w / 2));
-    const dy = Math.abs(player.y - (door.y + door.h / 2));
-    if (dx < 40 && dy < 40 && !door.opened) {
-      door.opened = true;
-      showMessage("Porta aberta!");
-      break;
-    }
-  }
-});
 
 gameLoop();
