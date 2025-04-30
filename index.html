@@ -6,6 +6,53 @@
   <title>Corredor Escuro</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+    }
+    #game {
+      display: block;
+      margin: 0 auto;
+      background: black;
+    }
+    #joystickContainer {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      touch-action: none;
+    }
+    #joystick {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      position: absolute;
+      left: 25px;
+      top: 25px;
+      pointer-events: none;
+    }
+    #actionButton {
+      position: absolute;
+      bottom: 40px;
+      right: 40px;
+      width: 70px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      text-align: center;
+      line-height: 70px;
+      font-size: 20px;
+      color: white;
+      user-select: none;
+      touch-action: manipulation;
+    }
+  </style>
 </head>
 <body>
   <canvas id="game" width="400" height="600"></canvas>
@@ -14,8 +61,7 @@
     <div id="joystick"></div>
   </div>
 
-  <button id="actionButton">Ação</button>
-  <div id="message" class="message"></div>
+  <div id="actionButton">A</div>
 
   <script src="joystick.js"></script>
   <script src="app.js"></script>
@@ -23,6 +69,13 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js');
     }
+
+    // evento para o botão A
+    document.getElementById("actionButton").addEventListener("touchstart", function () {
+      if (typeof handleActionButton === "function") {
+        handleActionButton();
+      }
+    });
   </script>
 </body>
 </html>
