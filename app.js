@@ -162,7 +162,10 @@ function handleAction() {
   }
 }
 
-document.getElementById("actionBtn").addEventListener("click", handleAction);
+const actionButton = document.getElementById("actionBtn");
+if (actionButton) {
+  actionButton.addEventListener("click", handleAction);
+}
 
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
