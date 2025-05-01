@@ -1,81 +1,180 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Corredor Escuro</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="manifest" href="manifest.json" />
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      overflow: hidden;
-    }
-    #game {
-      display: block;
-      margin: 0 auto;
-      background: black;
-    }
-    #joystickContainer {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      width: 100px;
-      height: 100px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 50%;
-      touch-action: none;
-    }
-    #joystick {
-      width: 50px;
-      height: 50px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      position: absolute;
-      left: 25px;
-      top: 25px;
-      pointer-events: none;
-    }
-    #actionButton {
-      position: absolute;
-      bottom: 40px;
-      right: 40px;
-      width: 70px;
-      height: 70px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      text-align: center;
-      line-height: 70px;
-      font-size: 20px;
-      color: white;
-      user-select: none;
-      touch-action: manipulation;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="game" width="400" height="600"></canvas>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-  <div id="joystickContainer">
-    <div id="joystick"></div>
-  </div>
+let player = {
+  x: 180,
+  y: 500,
+  size: 20,
+  speed: 2,
+  angle: 0
+};
 
-  <div id="actionButton">A</div>
+let showHint = false;
 
-  <script src="joystick.js"></script>
-  <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
+let doors = [
+  {
+    x: 150,
+    y: 370,
+    w: 10,
+    h: 40,
+    open: false,
+    side: "left"
+  },
+  {
+    x: 240,
+    y: 270,
+    w: 10,
+    h: 40,
+    open: false,
+    side: "right"
+  }
+];
+
+const walls = [
+  // corredor
+  { x: 150, y: 0, w: 10, h: 600 },
+  { x: 240, y: 0, w: 10, h: 600 },
+
+  // sala esquerda (maior)
+  { x: 60, y: 300, w: 90, h: 10 },
+  { x: 60, y: 300, w: 10, h: 200 },
+  { x: 60, y: 500, w: 90, h: 10 },
+
+  // sala direita (maior)
+  { x: 240, y: 200, w: 90, h: 10 },
+  { x: 320, y: 200, w: 10, h: 200 },
+  { x: 240, y: 400, w: 90, h: 10 }
+];
+
+function drawWalls() {
+  ctx.fillStyle = "#555";
+  for (let wall of walls) {
+    ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+  }
+}
+
+function drawDoors() {
+  ctx.fillStyle = "#aaa";
+  for (let door of doors) {
+    if (!door.open) {
+      ctx.fillRect(door.x, door.y, door.w, door.h);
     }
+  }
+}
 
-    // evento para o botão A
-    document.getElementById("actionButton").addEventListener("touchstart", function () {
-      if (typeof handleActionButton === "function") {
-        handleActionButton();
+function drawPlayer() {
+  ctx.fillStyle = "blue";
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawLanterna() {
+  let angle = Math.atan2(joystickData.dy, joystickData.dx);
+  if (joystickData.dx !== 0 || joystickData.dy !== 0) {
+    player.angle = angle;
+  }
+
+  ctx.save();
+  ctx.translate(player.x, player.y);
+  ctx.rotate(player.angle);
+
+  let gradient = ctx.createRadialGradient(0, 0, 10, 0, 0, 150);
+  gradient.addColorStop(0, "rgba(255,255,255,0.3)");
+  gradient.addColorStop(1, "rgba(0,0,0,0)");
+
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(100, -50);
+  ctx.lineTo(100, 50);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawHintText() {
+  if (showHint) {
+    ctx.fillStyle = "#fff";
+    ctx.font = "16px Arial";
+    ctx.fillText("Aperte AÇÃO para abrir", canvas.width / 2 - 90, 50);
+  }
+}
+
+function isColliding(x, y) {
+  for (let wall of walls) {
+    if (
+      x + player.size > wall.x &&
+      x - player.size < wall.x + wall.w &&
+      y + player.size > wall.y &&
+      y - player.size < wall.y + wall.h
+    ) {
+      return true;
+    }
+  }
+  for (let door of doors) {
+    if (!door.open) {
+      if (
+        x + player.size > door.x &&
+        x - player.size < door.x + door.w &&
+        y + player.size > door.y &&
+        y - player.size < door.y + door.h
+      ) {
+        return true;
       }
-    });
-  </script>
-</body>
-</html>
+    }
+  }
+  return false;
+}
+
+function update() {
+  let nextX = player.x + joystickData.dx * player.speed;
+  let nextY = player.y + joystickData.dy * player.speed;
+
+  if (!isColliding(nextX, player.y)) {
+    player.x = nextX;
+  }
+  if (!isColliding(player.x, nextY)) {
+    player.y = nextY;
+  }
+
+  showHint = false;
+  for (let door of doors) {
+    if (!door.open) {
+      let dx = player.x - (door.x + door.w / 2);
+      let dy = player.y - (door.y + door.h / 2);
+      let dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 40) {
+        showHint = true;
+        door.near = true;
+      } else {
+        door.near = false;
+      }
+    }
+  }
+}
+
+function handleAction() {
+  for (let door of doors) {
+    if (door.near && !door.open) {
+      door.open = true;
+    }
+  }
+}
+
+document.getElementById("actionBtn").addEventListener("click", handleAction);
+
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawWalls();
+  drawDoors();
+  drawLanterna();
+  drawPlayer();
+  drawHintText();
+  update();
+
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
