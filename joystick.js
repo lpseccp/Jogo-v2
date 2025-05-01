@@ -1,42 +1,42 @@
-let joystick = document.getElementById("joystick");
-let joystickContainer = document.getElementById("joystickContainer");
+let joystickData = { dx: 0, dy: 0 };
 
-let joystickData = {
-  dx: 0,
-  dy: 0
-};
+const joystickContainer = document.getElementById("joystickContainer");
+const joystick = document.getElementById("joystick");
 
-let active = false;
-let startX, startY;
+let dragging = false;
 
 joystickContainer.addEventListener("touchstart", function (e) {
-  active = true;
-  let touch = e.touches[0];
-  startX = touch.clientX;
-  startY = touch.clientY;
+  dragging = true;
+});
+
+joystickContainer.addEventListener("touchend", function (e) {
+  dragging = false;
+  joystick.style.left = "20px";
+  joystick.style.top = "20px";
+  joystickData = { dx: 0, dy: 0 };
 });
 
 joystickContainer.addEventListener("touchmove", function (e) {
-  if (!active) return;
-  let touch = e.touches[0];
-  let dx = touch.clientX - startX;
-  let dy = touch.clientY - startY;
-  let dist = Math.sqrt(dx * dx + dy * dy);
-  let maxDist = 40;
+  if (!dragging) return;
 
-  if (dist > maxDist) {
-    dx = (dx / dist) * maxDist;
-    dy = (dy / dist) * maxDist;
-  }
+  const rect = joystickContainer.getBoundingClientRect();
+  const touch = e.touches[0];
 
-  joystick.style.transform = `translate(${dx}px, ${dy}px)`;
-  joystickData.dx = dx / maxDist;
-  joystickData.dy = dy / maxDist;
-});
+  let x = touch.clientX - rect.left - rect.width / 2;
+  let y = touch.clientY - rect.top - rect.height / 2;
 
-joystickContainer.addEventListener("touchend", function () {
-  active = false;
-  joystick.style.transform = `translate(0px, 0px)`;
-  joystickData.dx = 0;
-  joystickData.dy = 0;
+  const maxDistance = rect.width / 2;
+  const distance = Math.min(maxDistance, Math.hypot(x, y));
+
+  const angle = Math.atan2(y, x);
+  const dx = Math.cos(angle) * distance;
+  const dy = Math.sin(angle) * distance;
+
+  joystick.style.left = `${dx + maxDistance - joystick.offsetWidth / 2}px`;
+  joystick.style.top = `${dy + maxDistance - joystick.offsetHeight / 2}px`;
+
+  joystickData = {
+    dx: Math.cos(angle),
+    dy: Math.sin(angle)
+  };
 });
