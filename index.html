@@ -1,6 +1,5 @@
-// Arquivo: index.html
-
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -10,63 +9,22 @@
 </head>
 <body>
   <canvas id="game" width="400" height="600"></canvas>
+
+  <!-- Analógico -->
   <div id="joystickContainer">
     <div id="joystick"></div>
   </div>
-  <button id="actionButton">Ação</button>  <script src="joystick.js"></script>  <script src="app.js"></script>  <script>
+
+  <!-- Botão de Ação -->
+  <button id="actionButton">Ação</button>
+
+  <!-- Scripts -->
+  <script src="joystick.js"></script>
+  <script src="app.js"></script>
+  <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js');
     }
-  </script></body>
-</html>// Arquivo: joystick.js
-
-let joystickData = { dx: 0, dy: 0 };
-
-const joystick = document.getElementById("joystick"); const container = document.getElementById("joystickContainer");
-
-let dragging = false; let startX, startY;
-
-container.addEventListener("touchstart", (e) => { dragging = true; const touch = e.touches[0]; startX = touch.clientX; startY = touch.clientY; });
-
-container.addEventListener("touchmove", (e) => { if (!dragging) return; const touch = e.touches[0]; const dx = touch.clientX - startX; const dy = touch.clientY - startY;
-
-joystick.style.transform = translate(${dx}px, ${dy}px); joystickData.dx = dx / 50; joystickData.dy = dy / 50; });
-
-container.addEventListener("touchend", () => { dragging = false; joystick.style.transform = translate(0, 0); joystickData.dx = 0; joystickData.dy = 0; });
-
-// Arquivo: app.js
-
-const canvas = document.getElementById("game"); const ctx = canvas.getContext("2d");
-
-const player = { x: 200, y: 550, size: 20, color: "white", speed: 2, dir: "right" };
-
-let showActionMessage = false; let nearDoor = false; let doorOpened = false;
-
-const door = { x: 180, y: 300, width: 40, height: 10 }; const room = { x: 100, y: 250, width: 200, height: 200 };
-
-function drawPlayer() { ctx.fillStyle = player.color; ctx.save(); ctx.translate(player.x, player.y); if (player.dir === "left") ctx.scale(-1, 1); ctx.fillRect(-player.size / 2, -player.size / 2, player.size, player.size); ctx.restore(); }
-
-function drawCorridor() { ctx.fillStyle = "#222"; ctx.fillRect(0, 0, 400, 600); ctx.fillStyle = "gray"; ctx.fillRect(100, 0, 200, 600); }
-
-function drawRoom() { if (!doorOpened) { ctx.fillStyle = "brown"; ctx.fillRect(door.x, door.y, door.width, door.height); } if (doorOpened) { ctx.fillStyle = "#333"; ctx.fillRect(room.x, room.y, room.width, room.height); } }
-
-function update() { ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-drawCorridor(); drawRoom();
-
-// Movimento player.x += joystickData.dx * player.speed; player.y += joystickData.dy * player.speed;
-
-// Direção if (joystickData.dx > 0.1) player.dir = "right"; else if (joystickData.dx < -0.1) player.dir = "left";
-
-// Verifica proximidade com a porta nearDoor = false; if (!doorOpened) { const distX = Math.abs(player.x - (door.x + door.width / 2)); const distY = Math.abs(player.y - (door.y + door.height / 2)); if (distX < 30 && distY < 30) { showActionMessage = true; nearDoor = true; } else { showActionMessage = false; } }
-
-// Texto de ação if (showActionMessage && !doorOpened) { ctx.fillStyle = "white"; ctx.font = "16px sans-serif"; ctx.fillText("Aperte Ação para abrir", player.x - 60, player.y - 30); }
-
-drawPlayer(); }
-
-function gameLoop() { update(); requestAnimationFrame(gameLoop); }
-
-gameLoop();
-
-document.getElementById("actionButton").addEventListener("click", () => { if (nearDoor && !doorOpened) { doorOpened = true; } });
-
+  </script>
+</body>
+</html>
