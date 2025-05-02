@@ -2,12 +2,13 @@ body {
   margin: 0;
   background: black;
   overflow: hidden;
+  touch-action: none;
 }
 
 canvas {
   display: block;
+  margin: 0 auto;
   background-color: #000;
-  margin: auto;
   touch-action: none;
 }
 
@@ -28,8 +29,9 @@ canvas {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   position: absolute;
-  top: 20px;
   left: 20px;
+  top: 20px;
+  pointer-events: none;
 }
 
 #actionButton {
@@ -39,9 +41,11 @@ canvas {
   width: 70px;
   height: 70px;
   background-color: rgba(255, 255, 255, 0.1);
+  border: none;
   border-radius: 50%;
   color: white;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: bold;
   text-align: center;
   line-height: 70px;
   user-select: none;
