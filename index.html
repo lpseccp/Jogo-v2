@@ -6,6 +6,55 @@
   <title>Corredor Escuro</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    canvas {
+      border: 2px solid #444;
+      background-color: #111;
+      display: block;
+    }
+
+    #joystickContainer {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 100px;
+      height: 100px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+    }
+
+    #joystick {
+      width: 60px;
+      height: 60px;
+      background-color: #999;
+      border-radius: 50%;
+      position: relative;
+      top: 20px;
+      left: 20px;
+    }
+
+    #actionBtn {
+      position: absolute;
+      bottom: 40px;
+      right: 20px;
+      padding: 15px 25px;
+      font-size: 18px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
   <canvas id="game" width="400" height="600"></canvas>
@@ -16,7 +65,7 @@
   </div>
 
   <!-- Botão de Ação -->
-  <button id="actionButton">Ação</button>
+  <button id="actionBtn">Ação</button>
 
   <!-- Scripts -->
   <script src="joystick.js"></script>
