@@ -1,11 +1,13 @@
 {
   "name": "Corredor Escuro",
   "short_name": "Corredor",
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
+  "scope": "./",
+  "lang": "pt-BR",
   "icons": [
     {
       "src": "icon-192.png",
